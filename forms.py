@@ -8,5 +8,5 @@ class TodoForm(FlaskForm):
     description = TextAreaField('description', validators=[DataRequired()])
     done = BooleanField('done', validators=[DataRequired()])
 
-class TodosSQLite:
+
     
