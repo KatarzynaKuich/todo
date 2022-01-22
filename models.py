@@ -32,13 +32,14 @@ class Todos:
 
 todos = Todos()
 
+
 class TodosSQLite:
-def __init__(self):
-    self.db_file = "database.db"
-    with sqlite3.connect(self.db_file) as conn:
-        conn.execute("""
+    def __init__(self):
+        self.db_file = "database.db"
+        with sqlite3.connect(self.db_file) as conn:
+            conn.execute("""
                    -- projects table
-                   CREATE TABLE IF NOT EXISTS books (
+                   CREATE TABLE IF NOT EXISTS todos (
                        id integer PRIMARY KEY,
                        title text NOT NULL,
                        description text NOT NULL,
@@ -46,68 +47,61 @@ def __init__(self):
                    );
                    """)
 
+    def all(self):
 
-def select_all(conn, table):
-    """
-    Query all rows in the table
-    :param conn: the Connection object
-    :return:
-    """
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM {table}")
-    rows = cur.fetchall()
+        with sqlite3.connect(self.db_file) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute(f"SELECT * FROM todos")
+            rows = cur.fetchall()
+            return rows
 
-    return rows
+    def get(self, id):
+        with sqlite3.connect(self.db_file) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute(f"SELECT * FROM todos WHERE id=?", (id,))
+            rows = cur.fetchall()
+            return rows
+    def create(self, data):
 
+        sql = '''INSERT INTO todos(title, description, done)
+                    VALUES(?,?,?)'''
 
-def update(conn, table, id, **kwargs):
-    """
-    update title, desctption, and done
-    :param conn:
-    :param table: table name
-    :param id: row id
-    :return:
-    """
-    parameters = [f"{k} = ?" for k in kwargs]
-    parameters = ", ".join(parameters)
-    values = tuple(v for v in kwargs.values())
-    values += (id,)
+        with sqlite3.connect(self.db_file) as conn:
+            cur = conn.cursor()
+            cur.execute(sql, data)
+            conn.commit()
+            return cur.lastrowid
 
-    sql = f''' UPDATE {table}
-             SET {parameters}
-             WHERE id = ?'''
-    try:
-        cur = conn.cursor()
-        cur.execute(sql, values)
-        conn.commit()
-        print("OK")
-    except sqlite3.OperationalError as e:
-        print(e)
+    def update(self, id, data):
+        with sqlite3.connect(self.db_file) as conn:
+            cur = conn.cursor()
+            parameters = [f"{k} = ?" for k in data]
+            parameters = ", ".join(parameters)
+            values = tuple(v for v in data.values())
+            values += (id,)
+            sql = f''' UPDATE todos
+                                SET {parameters}
+                                WHERE id = ?'''
+            try:
+                cur.execute(sql, values)
+                conn.commit()
+                print("OK")
+            except sqlite3.OperationalError as e:
+                print(e)
 
-    def delete_all(conn, table):
+    def delete_all(self):
         """
         Delete all rows from table
         :param conn: Connection to the SQLite database
         :param table: table name
         :return:
         """
-        sql = f'DELETE FROM {table}'
+        sql = f'DELETE FROM {self}'
         cur = conn.cursor()
         cur.execute(sql)
         conn.commit()
         print("Deleted")
 
-    if __name__ == "__main__":
-        todo = ("odrobic lekcje", "musze napisac projekt", "true")
-
-        conn = create_connection("database.db")
-
-        todo_id = add_todo(conn, todo)
-
-        print(todo_id)
-        conn.commit()
-        select_all(conn,"todos")
-        update(conn, "todos", 1)
-        delete_all(conn, "todos")
-        conn.close()
-todos=TodosSQLite()
+todos = TodosSQLite()
