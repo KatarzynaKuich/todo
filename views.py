@@ -1,6 +1,4 @@
 from __main__ import app
-
-import nbconvert.postprocessors
 from flask import Flask, request, render_template, redirect, url_for
 from forms import TodoForm
 from models import todos
@@ -28,10 +26,17 @@ def todo_details(todo_id):
     form = TodoForm(data=todo)
     if request.method == "POST":
         if form.validate_on_submit():
-            vdata =(form.data)
-            vdata.pop('csrf_token')
-            print(vdata)
-            todos.update(todo_id, vdata)
+
+            if request.form['submit']=='Go':
+                vdata = (form.data)
+                vdata.pop('csrf_token')
+                todos.update(todo_id, vdata)
+            if request.form['submit']=='Delete':
+                vdata = (form.data)
+                vdata.pop('csrf_token')
+                todos.delete(todo_id)
+
         return redirect(url_for("todos_list"))
+
     return render_template("todo.html", form=form, todo_id=todo_id)
 

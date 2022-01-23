@@ -29,10 +29,6 @@ class Todos:
         self.todos[id] = data
         self.save_all()
 
-
-todos = Todos()
-
-
 class TodosSQLite:
     def __init__(self):
         self.db_file = "database.db"
@@ -59,7 +55,7 @@ class TodosSQLite:
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            cur.execute(f"SELECT * FROM todos WHERE id=?", (id,))
+            cur.execute(f"SELECT * FROM todos WHERE rowid=?", (id,))
             rows = cur.fetchone()
             return rows
 
@@ -83,7 +79,7 @@ class TodosSQLite:
             print(values)
             sql = f''' UPDATE todos
                       SET {parameters}
-                      WHERE id = ?'''
+                      WHERE rowid = ?'''
             try:
                 cur = conn.cursor()
                 cur.execute(sql, values)
@@ -92,19 +88,18 @@ class TodosSQLite:
             except sqlite3.OperationalError as e:
                 print(e)
 
-
-def delete_all(self):
-    """
-    Delete all rows from table
-    :param conn: Connection to the SQLite database
-    :param table: table name
-    :return:
-    """
-    sql = f'DELETE FROM {self}'
-    cur = conn.cursor()
-    cur.execute(sql)
-    conn.commit()
-    print("Deleted")
-
+    def delete(self,id):
+        with sqlite3.connect(self.db_file) as conn:
+            """
+            Delete a task by task id
+            :param conn:  Connection to the SQLite database
+            :param id: id of the task
+            :return:
+            """
+            sql = 'DELETE FROM todos WHERE rowid=?'
+            cur = conn.cursor()
+            cur.execute(sql, (id,))
+            conn.commit()
+        print("Deleted")
 
 todos = TodosSQLite()
