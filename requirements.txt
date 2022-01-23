@@ -2,3 +2,4 @@ dnspython==2.1.0
 idna==3.3
 Flask==2.0.2
 Flask-WTF==0.14.3
+SqlAlchemy==1.4.31

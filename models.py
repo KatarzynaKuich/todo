@@ -48,7 +48,6 @@ class TodosSQLite:
                    """)
 
     def all(self):
-
         with sqlite3.connect(self.db_file) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
@@ -61,47 +60,51 @@ class TodosSQLite:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             cur.execute(f"SELECT * FROM todos WHERE id=?", (id,))
-            rows = cur.fetchall()
+            rows = cur.fetchone()
             return rows
-    def create(self, data):
 
+    def create(self, data):
         sql = '''INSERT INTO todos(title, description, done)
                     VALUES(?,?,?)'''
 
         with sqlite3.connect(self.db_file) as conn:
             cur = conn.cursor()
-            cur.execute(sql, data)
+            cur.execute(sql, tuple(data))
             conn.commit()
             return cur.lastrowid
 
-    def update(self, id, data):
+    def update(self, id, kwargs):
         with sqlite3.connect(self.db_file) as conn:
-            cur = conn.cursor()
-            parameters = [f"{k} = ?" for k in data]
+            parameters = [f"{k} = ?" for k in kwargs]
             parameters = ", ".join(parameters)
-            values = tuple(v for v in data.values())
+            print(parameters)
+            values = tuple(v for v in kwargs.values())
             values += (id,)
+            print(values)
             sql = f''' UPDATE todos
-                                SET {parameters}
-                                WHERE id = ?'''
+                      SET {parameters}
+                      WHERE id = ?'''
             try:
+                cur = conn.cursor()
                 cur.execute(sql, values)
                 conn.commit()
                 print("OK")
             except sqlite3.OperationalError as e:
                 print(e)
 
-    def delete_all(self):
-        """
-        Delete all rows from table
-        :param conn: Connection to the SQLite database
-        :param table: table name
-        :return:
-        """
-        sql = f'DELETE FROM {self}'
-        cur = conn.cursor()
-        cur.execute(sql)
-        conn.commit()
-        print("Deleted")
+
+def delete_all(self):
+    """
+    Delete all rows from table
+    :param conn: Connection to the SQLite database
+    :param table: table name
+    :return:
+    """
+    sql = f'DELETE FROM {self}'
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    print("Deleted")
+
 
 todos = TodosSQLite()
