@@ -69,17 +69,14 @@ class TodosSQLite:
             conn.commit()
             return cur.lastrowid
 
-    def update(self, id, kwargs):
+    def update(self,id,kwargs):
         with sqlite3.connect(self.db_file) as conn:
             parameters = [f"{k} = ?" for k in kwargs]
             parameters = ", ".join(parameters)
-            print(parameters)
             values = tuple(v for v in kwargs.values())
             values += (id,)
-            print(values)
             sql = f''' UPDATE todos
-                      SET {parameters}
-                      WHERE rowid = ?'''
+                      SET id = ?'''
             try:
                 cur = conn.cursor()
                 cur.execute(sql, values)
@@ -100,6 +97,9 @@ class TodosSQLite:
             cur = conn.cursor()
             cur.execute(sql, (id,))
             conn.commit()
+
         print("Deleted")
 
+
 todos = TodosSQLite()
+

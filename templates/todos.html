@@ -18,7 +18,7 @@
     </thead>
 {% for todo in todos %}
     <tr>
-        <td><a href="/todos/{{ loop.index }}">{{ todo.title }}</a></td>
+        <td><a href="/todos/{{ todo.id }}">{{ todo.title }}</a></td>
         <td>{{ todo.description }}</td>
         <td>{{ todo.done }}</td>
     </tr>
